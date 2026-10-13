@@ -10,7 +10,7 @@ namespace PrefabManager
 {
     /// <summary>
     /// Editor-friendly reskin: maps original prefabs to replacements.
-    /// Maps under any <c>Resources/PrefabOverrideMaps/</c> folder auto-apply at startup
+    /// Maps anywhere under a Resources folder auto-apply at startup
     /// (sorted by <see cref="priority"/>, then name); others are applied manually via <see cref="Apply"/>.
     /// Rows are toggled individually (unchecked rows are skipped).
     /// A conflict (same original → different replacement) overwrites with a warning; higher priority wins.
@@ -90,14 +90,13 @@ namespace PrefabManager
 
     internal static class PrefabOverrideMapBootstrap
     {
-        internal const string ResourcesFolder = "PrefabOverrideMaps";
-
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         static void AutoApply()
         {
-            var maps = Resources.LoadAll<PrefabOverrideMap>(ResourcesFolder);
+            var maps = Resources.LoadAll<PrefabOverrideMap>(string.Empty);
             if (maps == null || maps.Length == 0) return;
             PrefabOverrideMap.ApplyAll(maps);
+            Debug.Log($"[Prefabs] Applied {maps.Length} override maps, {PrefabManifest.OverrideCount} active overrides.");
         }
     }
 }

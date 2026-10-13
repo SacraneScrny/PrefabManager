@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Per-row enable checkbox in override maps (unchecked rows are skipped by `Apply`/`Revert`/auto-apply).
 - Inline drawer for override-map rows: single-line `[x] original -> replacement`, no foldout,
   `!` mark with tooltip on missing asset or prefab outside `Resources`.
+- Override-map inspector warns when the asset is outside `Resources`
+  (auto-apply won't pick it up); startup logs applied maps count.
+
+### Changed
+
+- Override maps auto-apply from anywhere under `Resources` (no dedicated subfolder required).
 
 ### Removed
 

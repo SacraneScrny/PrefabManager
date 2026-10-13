@@ -97,9 +97,11 @@ Create via `Create → Prefabs → Override Map`: a list of Original → Replace
 in `Resources`). Each row renders as a single line `[x] original -> replacement`
 (no foldout, no `Element N`); the checkbox excludes the row without deleting it,
 a `!` mark with tooltip flags a missing asset or a prefab outside `Resources`.
-Maps under any `Resources/PrefabOverrideMaps/` folder auto-apply
-at startup (`BeforeSplashScreen`) — no manual step, cache invalidation is automatic;
-other maps are applied manually:
+Maps anywhere under a `Resources` folder auto-apply
+at startup (`BeforeSplashScreen`, confirmed by a `[Prefabs] Applied N override maps ...`
+console line) — no manual step, cache invalidation is automatic;
+maps elsewhere are applied manually. The map inspector warns when auto-apply
+won't pick it up:
 
 ```csharp
 myMap.Apply();   // applies checked rows
