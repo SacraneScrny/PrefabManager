@@ -6,7 +6,7 @@ namespace PrefabManager
 {
     internal static class PrefabRegistry
     {
-        static readonly Dictionary<string, GameObject> _cache = new(System.StringComparer.Ordinal);
+        static readonly Dictionary<string, GameObject> _cache = new Dictionary<string, GameObject>(System.StringComparer.Ordinal);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Reset() => _cache.Clear();

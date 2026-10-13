@@ -5,10 +5,10 @@ namespace PrefabManager
 {
     public static class PrefabManifest
     {
-        static Dictionary<string, string> _paths = new(StringComparer.Ordinal);
+        static Dictionary<string, string> _paths = new Dictionary<string, string>(StringComparer.Ordinal);
         internal static IReadOnlyDictionary<string, string> Paths => _paths;
         public static void Register(Dictionary<string, string> paths)
-            => _paths = paths != null ? new Dictionary<string, string>(paths, StringComparer.Ordinal) : new(StringComparer.Ordinal);
+            => _paths = paths != null ? new Dictionary<string, string>(paths, StringComparer.Ordinal) : new Dictionary<string, string>(StringComparer.Ordinal);
         public static bool TryGetPath(string guid, out string path)
         {
             path = null;

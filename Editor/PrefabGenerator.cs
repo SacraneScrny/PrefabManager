@@ -406,7 +406,7 @@ namespace PrefabManager.Editor
             return s;
         }
 
-        static readonly HashSet<string> Keywords = new(StringComparer.Ordinal)
+        static readonly HashSet<string> Keywords = new HashSet<string>(StringComparer.Ordinal)
         {
             "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char",
             "checked", "class", "const", "continue", "decimal", "default", "delegate",
@@ -420,7 +420,7 @@ namespace PrefabManager.Editor
             "unsafe", "ushort", "using", "virtual", "void", "volatile", "while"
         };
 
-        static string Indent(int depth) => new(' ', depth * 4);
+        static string Indent(int depth) => new string(' ', depth * 4);
 
         static string Escape(string s)
             => s != null ? s.Replace("\\", "\\\\").Replace("\"", "\\\"") : string.Empty;
@@ -452,8 +452,8 @@ namespace PrefabManager.Editor
         {
             public string                       Name;
             public string                       RawName;
-            public Dictionary<string, TreeNode> Children = new(StringComparer.Ordinal);
-            public List<Leaf>                   Leaves   = new();
+            public Dictionary<string, TreeNode> Children = new Dictionary<string, TreeNode>(StringComparer.Ordinal);
+            public List<Leaf>                   Leaves   = new List<Leaf>();
             public TreeNode(string name, string raw) { Name = name; RawName = raw; }
         }
 
