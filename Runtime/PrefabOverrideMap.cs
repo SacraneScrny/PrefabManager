@@ -10,7 +10,7 @@ namespace PrefabManager
 {
     /// <summary>
     /// Editor-friendly reskin: maps original prefabs to replacements.
-    /// Maps under any <c>Resources/PrefabOverrideMaps/</c> folder auto-apply at startup
+    /// Enabled maps under any <c>Resources/PrefabOverrideMaps/</c> folder auto-apply at startup
     /// (sorted by <see cref="priority"/>, then name); others are applied manually via <see cref="Apply"/>.
     /// A conflict (same original → different replacement) overwrites with a warning; higher priority wins.
     /// Stores only GUIDs — the map itself never references prefab assets.
@@ -18,6 +18,8 @@ namespace PrefabManager
     [CreateAssetMenu(menuName = "Prefabs/Override Map", fileName = "PrefabOverrideMap")]
     public sealed class PrefabOverrideMap : ScriptableObject
     {
+        [Tooltip("Auto-applies at startup (from Resources/PrefabOverrideMaps/) when on.")]
+        public bool enabled = true;
         [Tooltip("Lower applies first; higher wins conflicts.")]
         public int priority;
         [Tooltip("Original → replacement. Empty-replacement rows are skipped with a warning.")]
@@ -94,7 +96,7 @@ namespace PrefabManager
         {
             var maps = Resources.LoadAll<PrefabOverrideMap>(ResourcesFolder);
             if (maps == null || maps.Length == 0) return;
-            PrefabOverrideMap.ApplyAll(maps);
+            PrefabOverrideMap.ApplyAll(maps.Where(m => m != null && m.enabled));
         }
     }
 }

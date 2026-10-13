@@ -94,17 +94,20 @@ with a cycle guard, `Register` does not clear them, any change clears the load c
 
 Create via `Create → Prefabs → Override Map`: a list of Original → Replacement rows
 (pick prefabs by drag-drop — the drawer stores only the guid, both sides should live
-in `Resources`). A map under any `Resources/PrefabOverrideMaps/` folder auto-applies
-at startup (`BeforeSplashScreen`); other maps are applied manually:
+in `Resources`). Each row renders as a single line `original -> replacement` (no foldout);
+a `!` mark with tooltip flags a missing asset or a prefab outside `Resources`.
+Enabled maps under any `Resources/PrefabOverrideMaps/` folder auto-apply
+at startup (`BeforeSplashScreen`) — no manual step, cache invalidation is automatic;
+other maps are applied manually:
 
 ```csharp
-myMap.Apply();   // same conflict rules as auto-apply
+myMap.Apply();   // explicit call works even when the map is disabled
 myMap.Revert();  // releases only slots this map still owns
 ```
 
 Several maps: applied sorted by `priority`, then name. Same original → different
 replacement overwrites with a `[Prefabs] Override conflict ...` warning (higher
-priority wins); re-applying the same value is silent. Test helpers:
-`Prefabs/Overrides/Apply All Maps`, `Prefabs/Overrides/Clear All Overrides`.
+priority wins); re-applying the same value is silent. Test helper:
+`Prefabs/Overrides/Clear All Overrides`.
 
 **Dependencies:** none. **Editor:** the `PrefabManager.Editor` generator.

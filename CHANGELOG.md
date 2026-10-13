@@ -4,6 +4,18 @@ All notable changes to this package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+
+- `PrefabOverrideMap.enabled`: only enabled maps auto-apply at startup.
+- Inline drawer for override-map rows: single-line `original -> replacement`, no foldout,
+  `!` mark with tooltip on missing asset or prefab outside `Resources`.
+
+### Removed
+
+- `Prefabs/Overrides/Apply All Maps` menu — maps auto-apply, no manual step.
+
 ## [1.1.0] - 2026-10-13
 
 ### Added

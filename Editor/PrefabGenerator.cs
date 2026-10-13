@@ -65,17 +65,6 @@ namespace PrefabManager.Editor
                        (dup + dupGuid == 0 ? "OK." : "See warnings above."));
         }
 
-        [MenuItem("Prefabs/Overrides/Apply All Maps")]
-        public static void ApplyAllOverrideMaps()
-        {
-            var maps = AssetDatabase.FindAssets("t:PrefabOverrideMap")
-                .Select(g => AssetDatabase.LoadAssetAtPath<PrefabManager.PrefabOverrideMap>(AssetDatabase.GUIDToAssetPath(g)))
-                .Where(m => m != null)
-                .ToList();
-            PrefabManager.PrefabOverrideMap.ApplyAll(maps);
-            Debug.Log($"[Prefabs] Applied {maps.Count} override maps, {PrefabManager.PrefabManifest.OverrideCount} active overrides.");
-        }
-
         [MenuItem("Prefabs/Overrides/Clear All Overrides")]
         public static void ClearAllOverrides()
         {
