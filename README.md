@@ -1,5 +1,11 @@
 # PrefabManager
 
+Install via Unity Package Manager → Add package from git URL:
+
+```
+https://github.com/SacraneScrny/PrefabManager.git
+```
+
 Type-safe access to prefabs from `Resources` via a generated tree plus a GUID manifest
 (no string paths at runtime).
 
