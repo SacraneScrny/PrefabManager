@@ -8,11 +8,13 @@ namespace PrefabManager
     {
         static readonly Dictionary<string, GameObject> _cache = new Dictionary<string, GameObject>(System.StringComparer.Ordinal);
 
+        static PrefabRegistry() => PrefabManifest.OverridesChanged += () => _cache.Clear();
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Reset() => _cache.Clear();
 
         internal static bool IsRegistered(string guid)
-            => !string.IsNullOrEmpty(guid) && PrefabManifest.Paths.ContainsKey(guid);
+            => PrefabManifest.IsRegistered(guid);
 
         internal static GameObject Load(string guid)
         {
@@ -23,10 +25,14 @@ namespace PrefabManager
 
             if (PrefabManifest.WarningsEnabled)
             {
+                var effective = PrefabManifest.ResolveGuid(guid);
+                var suffix = !string.Equals(effective, guid, System.StringComparison.Ordinal)
+                    ? $" (override of '{guid}')"
+                    : string.Empty;
                 if (!IsRegistered(guid))
-                    Debug.LogWarning($"[Prefabs] Unknown guid '{guid}'");
+                    Debug.LogWarning($"[Prefabs] Unknown guid '{effective}'{suffix}");
                 else if (PrefabManifest.TryGetPath(guid, out var path))
-                    Debug.LogWarning($"[Prefabs] Failed to load prefab at '{path}' (guid '{guid}')");
+                    Debug.LogWarning($"[Prefabs] Failed to load prefab at '{path}' (guid '{effective}'{suffix})");
             }
 
             return null;
@@ -40,7 +46,7 @@ namespace PrefabManager
             if (_cache.TryGetValue(guid, out prefab))
                 return true;
 
-            if (!PrefabManifest.Paths.TryGetValue(guid, out var path))
+            if (!PrefabManifest.TryGetPath(guid, out var path))
                 return false;
 
             prefab = Resources.Load<GameObject>(path);

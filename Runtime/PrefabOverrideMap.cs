@@ -1,0 +1,100 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using PrefabManager.Entities;
+
+using UnityEngine;
+
+namespace PrefabManager
+{
+    /// <summary>
+    /// Editor-friendly reskin: maps original prefabs to replacements.
+    /// Maps under any <c>Resources/PrefabOverrideMaps/</c> folder auto-apply at startup
+    /// (sorted by <see cref="priority"/>, then name); others are applied manually via <see cref="Apply"/>.
+    /// A conflict (same original → different replacement) overwrites with a warning; higher priority wins.
+    /// Stores only GUIDs — the map itself never references prefab assets.
+    /// </summary>
+    [CreateAssetMenu(menuName = "Prefabs/Override Map", fileName = "PrefabOverrideMap")]
+    public sealed class PrefabOverrideMap : ScriptableObject
+    {
+        [Tooltip("Lower applies first; higher wins conflicts.")]
+        public int priority;
+        [Tooltip("Original → replacement. Empty-replacement rows are skipped with a warning.")]
+        public List<Entry> entries = new List<Entry>();
+
+        [Serializable]
+        public struct Entry
+        {
+            public PrefabRef Original;
+            public PrefabRef Replacement;
+        }
+
+        public void Apply() => ApplyAll(new[] { this });
+
+        public void Revert()
+        {
+            if (entries == null) return;
+            foreach (var e in entries)
+            {
+                var orig = e.Original.Guid;
+                if (string.IsNullOrEmpty(orig)) continue;
+                // Only release slots we still own — a conflicting map may have overwritten them.
+                if (PrefabManifest.TryGetOverride(orig, out var existing) &&
+                    string.Equals(existing, e.Replacement.Guid, StringComparison.Ordinal))
+                    PrefabManifest.ClearOverride(orig);
+            }
+        }
+
+        public static void ApplyAll(IEnumerable<PrefabOverrideMap> maps)
+        {
+            if (maps == null) return;
+            var ordered = maps
+                .Where(m => m != null)
+                .OrderBy(m => m.priority)
+                .ThenBy(m => m.name, StringComparer.Ordinal);
+            foreach (var map in ordered)
+                map.ApplyEntries();
+        }
+
+        void ApplyEntries()
+        {
+            if (entries == null) return;
+            foreach (var e in entries)
+            {
+                var orig = e.Original.Guid;
+                var repl = e.Replacement.Guid;
+                if (string.IsNullOrEmpty(orig)) continue; // blank row
+                if (string.IsNullOrEmpty(repl))
+                {
+                    Debug.LogWarning($"[Prefabs] Empty replacement for '{Describe(orig)}' in map '{name}' — skipped.");
+                    continue;
+                }
+                if (string.Equals(orig, repl, StringComparison.Ordinal)) continue;
+                if (PrefabManifest.TryGetOverride(orig, out var existing))
+                {
+                    if (string.Equals(existing, repl, StringComparison.Ordinal)) continue; // idempotent re-apply
+                    Debug.LogWarning($"[Prefabs] Override conflict for '{Describe(orig)}': " +
+                                     $"'{Describe(existing)}' overwritten by '{Describe(repl)}' (map '{name}').");
+                }
+                PrefabManifest.SetOverride(orig, repl);
+            }
+        }
+
+        static string Describe(string guid)
+            => PrefabManifest.Paths.TryGetValue(guid, out var path) ? $"{path} ({guid})" : guid;
+    }
+
+    internal static class PrefabOverrideMapBootstrap
+    {
+        internal const string ResourcesFolder = "PrefabOverrideMaps";
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+        static void AutoApply()
+        {
+            var maps = Resources.LoadAll<PrefabOverrideMap>(ResourcesFolder);
+            if (maps == null || maps.Length == 0) return;
+            PrefabOverrideMap.ApplyAll(maps);
+        }
+    }
+}

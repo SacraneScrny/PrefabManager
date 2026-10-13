@@ -1,7 +1,7 @@
 {
   "name": "com.sackrany.prefabmanager",
   "displayName": "PrefabManager",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "unity": "2021.3",
   "description": "Type-safe access to prefabs from Resources via a generated tree plus a GUID manifest (no string paths at runtime).",
   "keywords": [

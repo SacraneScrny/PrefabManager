@@ -66,4 +66,45 @@ resolves the current path for debugging/tools, `Count` reports manifest size.
 Set `PrefabManifest.WarningsEnabled = false` to silence `[Prefabs]` warnings
 (e.g. when probing optional prefabs — or use `TryLoad` for a single silent check).
 
+## Reskin / substitution (no code changes at call sites)
+
+`PrefabRef` identity is untouched (same guid, same hash). The override is resolved
+inside `PrefabManifest`/`PrefabRegistry`, so `Load`/`Instantiate` on `PrefabRef`
+and `IPrefabRef` pick it up automatically:
+
+```csharp
+// One prefab:
+PrefabManifest.SetOverride(Prefabs.Enemies.Goblins.goblin01, Prefabs.Enemies.Goblins.goblin01_halloween);
+
+// Whole group/skin at once (one cache invalidation):
+PrefabManifest.SetOverrides(new Dictionary<PrefabRef, PrefabRef>
+{
+    [Prefabs.Enemies.Goblins.goblin01] = Prefabs.Enemies.Goblins.goblin01_halloween,
+});
+
+// Revert:
+PrefabManifest.ClearOverride(Prefabs.Enemies.Goblins.goblin01);
+PrefabManifest.ClearAllOverrides();
+```
+
+Notes: overrides are runtime-only (not serialized), chains resolve transitively
+with a cycle guard, `Register` does not clear them, any change clears the load cache.
+
+### Override maps (editor reskin assets)
+
+Create via `Create → Prefabs → Override Map`: a list of Original → Replacement rows
+(pick prefabs by drag-drop — the drawer stores only the guid, both sides should live
+in `Resources`). A map under any `Resources/PrefabOverrideMaps/` folder auto-applies
+at startup (`BeforeSplashScreen`); other maps are applied manually:
+
+```csharp
+myMap.Apply();   // same conflict rules as auto-apply
+myMap.Revert();  // releases only slots this map still owns
+```
+
+Several maps: applied sorted by `priority`, then name. Same original → different
+replacement overwrites with a `[Prefabs] Override conflict ...` warning (higher
+priority wins); re-applying the same value is silent. Test helpers:
+`Prefabs/Overrides/Apply All Maps`, `Prefabs/Overrides/Clear All Overrides`.
+
 **Dependencies:** none. **Editor:** the `PrefabManager.Editor` generator.
