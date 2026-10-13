@@ -13,5 +13,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Editor assembly `PrefabManager.Editor` (`Editor/PrefabManager.Editor.asmdef`, Editor-only): `PrefabGenerator` (`Prefabs/Generate`, `Prefabs/Validate`), `PrefabPostprocessor` (auto-regeneration on prefab/folder changes).
 - GUID-based identity: rename/move of a prefab keeps serialized `PrefabRef` valid, only the `guid -> resourcePath` mapping is regenerated.
 - Runtime API: `Load` / `TryLoad` / `Instantiate` on `PrefabRef` and `IPrefabRef`, `IsRegistered`, `PrefabManifest.TryGetPath` / `Count` / `WarningsEnabled`.
-- `package.json` (`com.sacranescrny.prefabmanager`): Unity 2021.3+, zero dependencies.
+- `package.json` (`com.sackrany.prefabmanager`): Unity 2021.3+, zero dependencies.
 - `README`: installation via Unity Package Manager (git URL).
