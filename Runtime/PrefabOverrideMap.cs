@@ -95,6 +95,7 @@ namespace PrefabManager
         {
             var maps = Resources.LoadAll<PrefabOverrideMap>(string.Empty);
             if (maps == null || maps.Length == 0) return;
+            PrefabManifest.ClearAllOverrides();
             PrefabOverrideMap.ApplyAll(maps);
             Debug.Log($"[Prefabs] Applied {maps.Length} override maps, {PrefabManifest.OverrideCount} active overrides.");
         }

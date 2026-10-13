@@ -99,7 +99,9 @@ in `Resources`). Each row renders as a single line `[x] original -> replacement`
 a `!` mark with tooltip flags a missing asset or a prefab outside `Resources`.
 Maps anywhere under a `Resources` folder auto-apply
 at startup (`BeforeSplashScreen`, confirmed by a `[Prefabs] Applied N override maps ...`
-console line) — no manual step, cache invalidation is automatic;
+console line) — no manual step, cache invalidation is automatic.
+When maps are found, previous overrides are cleared first, so unchecked
+or deleted rows reliably turn off (also across play sessions without domain reload);
 maps elsewhere are applied manually. The map inspector warns when auto-apply
 won't pick it up:
 

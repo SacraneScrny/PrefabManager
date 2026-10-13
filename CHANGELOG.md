@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Override maps auto-apply from anywhere under `Resources` (no dedicated subfolder required).
+- Startup with maps found clears previous overrides first, so unchecked/removed rows
+  reliably turn off (no stale state across play sessions without domain reload).
 
 ### Removed
 
