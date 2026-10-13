@@ -10,16 +10,15 @@ namespace PrefabManager
 {
     /// <summary>
     /// Editor-friendly reskin: maps original prefabs to replacements.
-    /// Enabled maps under any <c>Resources/PrefabOverrideMaps/</c> folder auto-apply at startup
+    /// Maps under any <c>Resources/PrefabOverrideMaps/</c> folder auto-apply at startup
     /// (sorted by <see cref="priority"/>, then name); others are applied manually via <see cref="Apply"/>.
+    /// Rows are toggled individually (unchecked rows are skipped).
     /// A conflict (same original → different replacement) overwrites with a warning; higher priority wins.
     /// Stores only GUIDs — the map itself never references prefab assets.
     /// </summary>
     [CreateAssetMenu(menuName = "Prefabs/Override Map", fileName = "PrefabOverrideMap")]
     public sealed class PrefabOverrideMap : ScriptableObject
     {
-        [Tooltip("Auto-applies at startup (from Resources/PrefabOverrideMaps/) when on.")]
-        public bool enabled = true;
         [Tooltip("Lower applies first; higher wins conflicts.")]
         public int priority;
         [Tooltip("Original → replacement. Empty-replacement rows are skipped with a warning.")]
@@ -28,6 +27,7 @@ namespace PrefabManager
         [Serializable]
         public struct Entry
         {
+            public bool disabled;
             public PrefabRef Original;
             public PrefabRef Replacement;
         }
@@ -39,9 +39,9 @@ namespace PrefabManager
             if (entries == null) return;
             foreach (var e in entries)
             {
+                if (e.disabled) continue;
                 var orig = e.Original.Guid;
                 if (string.IsNullOrEmpty(orig)) continue;
-                // Only release slots we still own — a conflicting map may have overwritten them.
                 if (PrefabManifest.TryGetOverride(orig, out var existing) &&
                     string.Equals(existing, e.Replacement.Guid, StringComparison.Ordinal))
                     PrefabManifest.ClearOverride(orig);
@@ -64,9 +64,10 @@ namespace PrefabManager
             if (entries == null) return;
             foreach (var e in entries)
             {
+                if (e.disabled) continue;
                 var orig = e.Original.Guid;
                 var repl = e.Replacement.Guid;
-                if (string.IsNullOrEmpty(orig)) continue; // blank row
+                if (string.IsNullOrEmpty(orig)) continue;
                 if (string.IsNullOrEmpty(repl))
                 {
                     Debug.LogWarning($"[Prefabs] Empty replacement for '{Describe(orig)}' in map '{name}' — skipped.");
@@ -75,7 +76,7 @@ namespace PrefabManager
                 if (string.Equals(orig, repl, StringComparison.Ordinal)) continue;
                 if (PrefabManifest.TryGetOverride(orig, out var existing))
                 {
-                    if (string.Equals(existing, repl, StringComparison.Ordinal)) continue; // idempotent re-apply
+                    if (string.Equals(existing, repl, StringComparison.Ordinal)) continue;
                     Debug.LogWarning($"[Prefabs] Override conflict for '{Describe(orig)}': " +
                                      $"'{Describe(existing)}' overwritten by '{Describe(repl)}' (map '{name}').");
                 }
@@ -96,7 +97,7 @@ namespace PrefabManager
         {
             var maps = Resources.LoadAll<PrefabOverrideMap>(ResourcesFolder);
             if (maps == null || maps.Length == 0) return;
-            PrefabOverrideMap.ApplyAll(maps.Where(m => m != null && m.enabled));
+            PrefabOverrideMap.ApplyAll(maps);
         }
     }
 }

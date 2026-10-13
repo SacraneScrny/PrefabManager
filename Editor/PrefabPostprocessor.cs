@@ -32,8 +32,6 @@ namespace PrefabManager.Editor
                 try
                 {
                     _generating = true;
-                    // No refresh here: we are already inside an import pass.
-                    // WriteFile skips unchanged files, so no import loop.
                     PrefabGenerator.DoGenerate(refresh: false);
                 }
                 finally
@@ -57,15 +55,8 @@ namespace PrefabManager.Editor
             foreach (var p in paths)
             {
                 if (string.IsNullOrEmpty(p)) continue;
-                // Ignore generated output itself.
                 if (PrefabGenerator.IsGeneratedPath(p)) continue;
-                // Prefab add/delete/move/rename, incl. content edits.
                 if (p.EndsWith(".prefab", StringComparison.OrdinalIgnoreCase)) return true;
-                // Folder add/delete/move/rename: Unity reports the folder, not the
-                // contained prefabs, but resourcePaths of everything inside may change
-                // (e.g. renaming a folder inside Resources, or moving a Resources subtree).
-                // Folders have no extension; IsValidFolder covers dotted folder names.
-                // Deleted folders are already gone, so the extension check catches them.
                 var name = p.TrimEnd('/').Substring(p.TrimEnd('/').LastIndexOf('/') + 1);
                 if (!name.Contains(".") || AssetDatabase.IsValidFolder(p)) return true;
             }

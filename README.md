@@ -94,14 +94,15 @@ with a cycle guard, `Register` does not clear them, any change clears the load c
 
 Create via `Create → Prefabs → Override Map`: a list of Original → Replacement rows
 (pick prefabs by drag-drop — the drawer stores only the guid, both sides should live
-in `Resources`). Each row renders as a single line `original -> replacement` (no foldout);
+in `Resources`). Each row renders as a single line `[x] original -> replacement`
+(no foldout, no `Element N`); the checkbox excludes the row without deleting it,
 a `!` mark with tooltip flags a missing asset or a prefab outside `Resources`.
-Enabled maps under any `Resources/PrefabOverrideMaps/` folder auto-apply
+Maps under any `Resources/PrefabOverrideMaps/` folder auto-apply
 at startup (`BeforeSplashScreen`) — no manual step, cache invalidation is automatic;
 other maps are applied manually:
 
 ```csharp
-myMap.Apply();   // explicit call works even when the map is disabled
+myMap.Apply();   // applies checked rows
 myMap.Revert();  // releases only slots this map still owns
 ```
 

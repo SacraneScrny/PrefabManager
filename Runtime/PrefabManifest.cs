@@ -11,9 +11,6 @@ namespace PrefabManager
     {
         static Dictionary<string, string> _paths = new Dictionary<string, string>(StringComparer.Ordinal);
         internal static IReadOnlyDictionary<string, string> Paths => _paths;
-
-        // Runtime-only substitution: originalGuid -> replacementGuid.
-        // PrefabRef identity (hash/name) is untouched — resolution happens here.
         static readonly Dictionary<string, string> _overrides = new Dictionary<string, string>(StringComparer.Ordinal);
         internal static event Action OverridesChanged;
         public static IReadOnlyDictionary<string, string> Overrides => _overrides;
@@ -110,7 +107,6 @@ namespace PrefabManager
             OverridesChanged?.Invoke();
         }
 
-        // Empty/self replacement = remove. Returns true when the map changed.
         static bool SetOverrideCore(string originalGuid, string replacementGuid)
         {
             if (string.IsNullOrEmpty(originalGuid)) return false;

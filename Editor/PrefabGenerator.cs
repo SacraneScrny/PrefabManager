@@ -97,10 +97,6 @@ namespace PrefabManager.Editor
             File.WriteAllText(path, json);
         }
 
-        // Scan ALL Resources folders, bind each prefab to the NEAREST
-        // parent Resources folder, dedup by GUID, warn on duplicate resourcePath.
-        // Identity is the asset GUID: rename/move keeps PrefabRef valid,
-        // only guid->path mapping is regenerated.
         static List<Entry> CollectEntries()
         {
             var resourceRoots = AssetDatabase
@@ -109,7 +105,6 @@ namespace PrefabManager.Editor
                             (p == "Assets/Resources" || p.EndsWith("/Resources", StringComparison.Ordinal)))
                 .ToList();
 
-            // Longest first => first match is the nearest parent Resources.
             resourceRoots.Sort((a, b) => b.Length.CompareTo(a.Length));
 
             var byGuid = new Dictionary<string, Collected>(StringComparer.Ordinal);
@@ -130,7 +125,7 @@ namespace PrefabManager.Editor
                     }
                 }
 
-                if (bestRoot == null) continue; // not inside any Resources folder
+                if (bestRoot == null) continue;
 
                 var relative = fullPath.Substring(bestRoot.Length + 1).Replace('\\', '/');
                 var resourcePath = Path.ChangeExtension(relative, null)?.Replace('\\', '/');
@@ -139,8 +134,6 @@ namespace PrefabManager.Editor
                 byGuid[guid] = new Collected(guid, fullPath, resourcePath);
             }
 
-            // Same resourcePath in two different Resources folders => Resources.Load ambiguity.
-            // Dedup exact (case-sensitive); case-only differences are kept but warned about.
             var dedupByPath = new List<Collected>();
             foreach (var g in byGuid.Values.GroupBy(c => c.ResourcePath, StringComparer.Ordinal))
             {
@@ -289,7 +282,6 @@ namespace PrefabManager.Editor
             WriteFile("PrefabManifestInstaller.cs", sb);
         }
 
-        // "_" separator + numeric uniquification on collision.
         static Dictionary<string, string> BuildFolderIfaceMap(List<Entry> entries)
         {
             var folders = CollectFolders(entries)
@@ -336,8 +328,6 @@ namespace PrefabManager.Editor
             return folders;
         }
 
-        // Uniquify leaf vs leaf and leaf vs child node,
-        // and merge folders only when raw names match.
         static (TreeNode Root, Dictionary<string, string> DotMap) BuildTree(List<Entry> entries)
         {
             var root = new TreeNode("Prefabs", string.Empty);
@@ -399,7 +389,6 @@ namespace PrefabManager.Editor
             }
         }
 
-        // Empty-safe, digit-safe, keyword-safe.
         static string SanitizeName(string raw)
         {
             if (string.IsNullOrEmpty(raw)) return "_";

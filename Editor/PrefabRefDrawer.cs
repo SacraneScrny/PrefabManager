@@ -72,18 +72,20 @@ namespace PrefabManager.Editor
                path.Contains("/Resources/", StringComparison.Ordinal);
     }
 
-    /// <summary>Override-map row as a single line: Original -&gt; Replacement. No foldout.</summary>
+    /// <summary>Override-map row as a single line: [x] Original -&gt; Replacement. No foldout.</summary>
     [CustomPropertyDrawer(typeof(PrefabManager.PrefabOverrideMap.Entry))]
     public sealed class PrefabOverrideMapEntryDrawer : PropertyDrawer
     {
+        const float CheckWidth = 18f;
         const float ArrowWidth = 28f;
         const float WarnWidth  = 20f;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            var disabledProp = property.FindPropertyRelative("disabled");
             var origProp = property.FindPropertyRelative("Original")?.FindPropertyRelative("_guid");
             var replProp = property.FindPropertyRelative("Replacement")?.FindPropertyRelative("_guid");
-            if (origProp == null || replProp == null)
+            if (disabledProp == null || origProp == null || replProp == null)
             {
                 EditorGUI.PropertyField(position, property, label, true);
                 return;
@@ -92,14 +94,23 @@ namespace PrefabManager.Editor
             EditorGUI.BeginProperty(position, label, property);
             float h = EditorGUIUtility.singleLineHeight;
 
+            var check = new Rect(position.x, position.y, CheckWidth, h);
+
+            EditorGUI.BeginChangeCheck();
+            bool on = EditorGUI.Toggle(check, !disabledProp.boolValue);
+            if (EditorGUI.EndChangeCheck())
+                disabledProp.boolValue = !on;
+
             var origWarn = PrefabRefDrawer.GetWarning(origProp.stringValue);
             var replWarn = PrefabRefDrawer.GetWarning(replProp.stringValue);
             var firstWarn = origWarn ?? replWarn;
 
-            float fieldW = (position.width - ArrowWidth - (firstWarn != null ? WarnWidth : 0)) / 2f;
-            var left  = new Rect(position.x, position.y, fieldW, h);
+            float fieldW = (position.width - CheckWidth - ArrowWidth - (firstWarn != null ? WarnWidth : 0)) / 2f;
+            var left  = new Rect(check.xMax, position.y, fieldW, h);
             var arrow = new Rect(left.xMax, position.y, ArrowWidth, h);
             var right = new Rect(arrow.xMax, position.y, fieldW, h);
+
+            EditorGUI.BeginDisabledGroup(disabledProp.boolValue);
 
             EditorGUI.BeginChangeCheck();
             var origObj = EditorGUI.ObjectField(left, PrefabRefDrawer.LoadPrefab(origProp.stringValue), typeof(GameObject), false);
@@ -112,6 +123,8 @@ namespace PrefabManager.Editor
             var replObj = EditorGUI.ObjectField(right, PrefabRefDrawer.LoadPrefab(replProp.stringValue), typeof(GameObject), false);
             if (EditorGUI.EndChangeCheck())
                 PrefabRefDrawer.SetGuidFromObject(replProp, replObj);
+
+            EditorGUI.EndDisabledGroup();
 
             if (firstWarn != null)
                 EditorGUI.LabelField(new Rect(right.xMax, position.y, WarnWidth, h), new GUIContent("!", firstWarn));

@@ -8,8 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- `PrefabOverrideMap.enabled`: only enabled maps auto-apply at startup.
-- Inline drawer for override-map rows: single-line `original -> replacement`, no foldout,
+- Per-row enable checkbox in override maps (unchecked rows are skipped by `Apply`/`Revert`/auto-apply).
+- Inline drawer for override-map rows: single-line `[x] original -> replacement`, no foldout,
   `!` mark with tooltip on missing asset or prefab outside `Resources`.
 
 ### Removed
